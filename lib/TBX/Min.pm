@@ -17,7 +17,9 @@ use TBX::Min::ConceptEntry;
 use TBX::Min::LangGroup;
 use TBX::Min::TermGroup;
 use XML::Writer;
-our $VERSION = '0.01'; # VERSION
+use DateTime::Format::ISO8601;
+use Try::Tiny;
+our $VERSION = '0.02'; # VERSION
 
 unless (caller){
 	use Data::Dumper;
@@ -38,15 +40,27 @@ sub new_from_xml {
 		# output_encoding => 'UTF-8',
 		# do_not_chain_handlers => 1, #can be important when things get complicated
 		keep_spaces		=> 0,
+
+        # these store new conceptEntries, langGroups and termGroups
+        start_tag_handlers => {
+            conceptEntry => \&_conceptStart,
+            langGroup => \&_langStart,
+            termGroup => \&_termGrpStart,
+        },
+
 		TwigHandlers    => {
-            TBX => \&_tbx,
 			# header attributes become attributes of the TBX::Min object
-			title => \&_headerAtt,
-			subjectField => \&_subjectField,
-			origin => \&_headerAtt,
-			license => \&_headerAtt,
-			directionality => \&_headerAtt,
-			languages => \&_languages,
+            id => \&_headerAtt,
+            description => \&_headerAtt,
+            dateCreated => \&_date_created,
+            creator => \&_headerAtt,
+            license => \&_headerAtt,
+            directionality => \&_headerAtt,
+            languages => \&_languages,
+
+            # becomes part of the current TBX::Min::ConceptEntry object
+			subjectField => sub {
+                shift->{tbx_min_concepts}->[-1]->subject_field($_->text)},
 
 			# these become attributes of the current TBX::Min::TermGroup object
 			term => sub {shift->{tbx_min_current_term_grp}->term($_->text)},
@@ -57,11 +71,6 @@ sub new_from_xml {
 				shift->{tbx_min_current_term_grp}->customer($_->text)},
 			termStatus => sub {
 				shift->{tbx_min_current_term_grp}->status($_->text)},
-		},
-		start_tag_handlers => {
-			conceptEntry => \&_conceptStart,
-			langGroup => \&_langStart,
-			termGroup => \&_termGrpStart,
 		}
 	);
 
@@ -88,6 +97,10 @@ sub new {
     my ($class, $args) = @_;
     my $self;
     if((ref $args) eq 'HASH'){
+        #don't store a plain string for datetime
+        if(my $dt_string = $args->{date_created}){
+            $args->{date_created} = _parse_datetime($dt_string);
+        }
         $self = $args;
     }else{
         $self = {};
@@ -95,20 +108,51 @@ sub new {
     return bless $self, $class;
 }
 
-sub title {
-    my ($self, $title) = @_;
-    if($title) {
-        return $self->{title} = $title;
+sub id {
+    my ($self, $id) = @_;
+    if($id) {
+        return $self->{id} = $id;
     }
-    return $self->{title};
+    return $self->{id};
 }
 
-sub origin {
-    my ($self, $origin) = @_;
-    if($origin) {
-        return $self->{origin} = $origin;
+sub description {
+    my ($self, $description) = @_;
+    if($description) {
+        return $self->{description} = $description;
     }
-    return $self->{origin};
+    return $self->{description};
+}
+
+sub date_created {
+    my ($self, $date_created) = @_;
+    if($date_created) {
+        return $self->{date_created} =
+            _parse_datetime($date_created);
+    }
+    if(my $dt = $self->{date_created}){
+        return $dt->iso8601;
+    }
+    return;
+}
+
+sub _parse_datetime {
+    my ($dt_string) = @_;
+    my $dt;
+    try{
+        $dt = DateTime::Format::ISO8601->parse_datetime($dt_string);
+    }catch{
+        croak 'date is not in ISO8601 format';
+    };
+    return $dt;
+}
+
+sub creator {
+    my ($self, $creator) = @_;
+    if($creator) {
+        return $self->{creator} = $creator;
+    }
+    return $self->{creator};
 }
 
 sub license {
@@ -143,14 +187,6 @@ sub target_lang {
     return $self->{target_lang};
 }
 
-sub doc_lang {
-    my ($self, $doc_lang) = @_;
-    if($doc_lang) {
-        return $self->{doc_lang} = $doc_lang;
-    }
-    return $self->{doc_lang};
-}
-
 sub concepts { ## no critic(RequireArgUnpacking)
     my ($self) = @_;
     if (@_ > 1){
@@ -173,11 +209,10 @@ sub as_xml {
     my $xml;
     my $writer = XML::Writer->new(
         OUTPUT => \$xml, NEWLINES => 1, ENCODING => 'utf-8');
-    $writer->startTag('TBX', dialect => 'TBX-Min',
-        $self->doc_lang ? ('xml:lang' => $self->doc_lang) : ());
+    $writer->startTag('TBX', dialect => 'TBX-Min');
 
     $writer->startTag('header');
-    for my $header_att (qw(title origin license directionality)){
+    for my $header_att (qw(id creator license directionality description)){
         next unless $self->{$header_att};
         $writer->startTag($header_att);
         $writer->characters($self->{$header_att});
@@ -188,6 +223,11 @@ sub as_xml {
         push @atts, (source => $self->{source_lang}) if $self->{source_lang};
         push @atts, (target => $self->{target_lang}) if $self->{target_lang};
         $writer->emptyTag('languages', @atts);
+    }
+    if(my $dt = $self->{date_created}){
+        $writer->startTag('dateCreated');
+        $writer->characters($dt->iso8601);
+        $writer->endTag;
     }
     $writer->endTag; # header
 
@@ -257,18 +297,17 @@ sub as_xml {
 # all of the twig handlers store state on the XML::Twig object. A bit kludgy,
 # but it works.
 
-sub _tbx {
-    my ($twig, $_) = @_;
-    if(my $lang = $_->att('xml:lang')){
-        $twig->{tbx_min_att}->{doc_lang} = $lang;
-    }
-    return 1;
+sub _headerAtt {
+	my ($twig, $node) = @_;
+	$twig->{tbx_min_att}->{_decamel($node->name)} = $node->text;
+	return 1;
 }
 
-sub _headerAtt{
-	my ($twig, $_) = @_;
-	${ $twig->{'tbx_min_att'} }{_decamel($_->name)} = $_->text;
-	return 1;
+sub _date_created {
+    my ($twig, $node) = @_;
+    $twig->{tbx_min_att}->{date_created} =
+        _parse_datetime($node->text);
+    return 1;
 }
 
 # turn camelCase into camel_case
@@ -279,11 +318,11 @@ sub _decamel {
 }
 
 sub _languages{
-	my ($twig, $_) = @_;
-	if(my $source = $_->att('source')){
+	my ($twig, $node) = @_;
+	if(my $source = $node->att('source')){
 		${ $twig->{'tbx_min_att'} }{'source_lang'} = $source;
 	}
-	if(my $target = $_->att('target')){
+	if(my $target = $node->att('target')){
 		${ $twig->{'tbx_min_att'} }{'target_lang'} = $target;
 	}
 	return 1;
@@ -348,7 +387,7 @@ TBX::Min - Read, write and edit TBX-Min files
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -374,19 +413,30 @@ containing this data is required.
 
 Creates a new C<TBX::Min> instance. Optionally you may pass in
 a hash reference which is used to initialize the object. The allowed hash
-fields are C<title>, C<origin>, C<license>, C<directionality>, C<source_lang>
-and C<target_lang>, which correspond to methods of the same name, and
-C<concepts>, which should be an array reference containing
-C<TBX::Min::ConceptEntry> objects.
+fields are C<id>, C<description>, C<date_created>, C<creator>, C<license>,
+C<directionality>, C<source_lang> and C<target_lang>, which correspond to
+methods of the same name, and C<concepts>, which should be an array reference
+containing C<TBX::Min::ConceptEntry> objects. This method croaks if
+C<date_created> is not in ISO 8601 format.
 
-=head2 C<title>
+=head2 C<id>
 
-Get or set the document title.
+Get or set the document id. This should be a unique string
+identifying this glossary.
 
-=head2 C<origin>
+=head2 C<description>
 
-Get or set the document origin string (a note about or the title of the
-document's origin).
+Get or set the document description.
+
+=head2 C<date_created>
+
+Get or set the the date that the document was created. This should be a
+string in ISO 8601 format. This method croaks if C<date_created> is not
+in ISO 8601 format.
+
+=head2 C<creator>
+
+Get or set the name of the document creator.
 
 =head2 C<license>
 
@@ -399,17 +449,13 @@ the direction of translation this document is designed for.
 
 =head2 C<source_lang>
 
-Get or set the document source language (abbreviation) string.
+Get or set the code representing the document source language. This should
+be ISO 639 and 3166 (e.g. C<en-US>, C<de>, etc.).
 
 =head2 C<target_lang>
 
-Get or set the document target language (abbreviation) string.
-
-=head2 C<doc_lang>
-
-Get or set the language used in the document outside of C<LangGroup>
-contents (such as in the title or origin strings.) This should be an
-abbreviation such as "en".
+Get or set the code representing the document target language. This should
+be ISO 639 and 3166 (e.g. C<en-US>, C<de>, etc.).
 
 =head2 C<concepts>
 

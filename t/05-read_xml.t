@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::More 0.88;
-plan tests => 45;
+plan tests => 43;
 use Test::NoWarnings;
 use TBX::Min;
 use FindBin qw($Bin);
@@ -23,15 +23,14 @@ sub test_read {
     my $min = TBX::Min->new_from_xml($input);
 
     isa_ok($min, 'TBX::Min');
-    is($min->doc_lang, 'en', 'correct document language');
     test_header($min);
     test_body($min);
 }
 
 sub test_header {
     my ($min) = @_;
-    is($min->title, 'TBX sample', 'correct title');
-    is($min->origin, 'Klaus-Dirk Schmidt', 'correct origin');
+    is($min->id, 'TBX sample', 'correct id');
+    is($min->creator, 'Klaus-Dirk Schmidt', 'correct creator');
     is($min->license, 'CC BY license can be freely copied and modified',
         'correct license');
     is($min->directionality, 'bidirectional', 'correct directionality');

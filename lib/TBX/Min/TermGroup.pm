@@ -17,7 +17,7 @@ TBX::Min::TermGroup->mk_accessors(qw(
     customer
     status
 ));
-our $VERSION = '0.01'; # VERSION
+our $VERSION = '0.02'; # VERSION
 
 # ABSTRACT: Store information from one TBX-Min C<termGroup> element
 
@@ -34,7 +34,7 @@ TBX::Min::TermGroup - Store information from one TBX-Min C<termGroup> element
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 

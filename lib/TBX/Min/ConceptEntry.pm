@@ -10,7 +10,7 @@ package TBX::Min::ConceptEntry;
 use strict;
 use warnings;
 use Carp;
-our $VERSION = '0.01'; # VERSION
+our $VERSION = '0.02'; # VERSION
 
 # ABSTRACT: Store information from one TBX-Min C<conceptEntry> element
 
@@ -71,7 +71,7 @@ TBX::Min::ConceptEntry - Store information from one TBX-Min C<conceptEntry> elem
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 

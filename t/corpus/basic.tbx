@@ -1,9 +1,11 @@
 <?xml version='1.0' encoding="UTF-8"?>
-<TBX dialect="TBX-Min" xml:lang="en">
+<TBX dialect="TBX-Min">
     <header>
+        <id>TBX sample</id>
+        <description>A short sample file demonstrating TBX-Min</description>
+        <dateCreated>2013-11-12T00:00:00</dateCreated>
         <languages source="de" target="en"/>
-        <title>TBX sample</title>
-        <origin>Klaus-Dirk Schmidt</origin>
+        <creator>Klaus-Dirk Schmidt</creator>
         <directionality>bidirectional</directionality>
         <license>CC BY license can be freely copied and modified</license>
     </header>

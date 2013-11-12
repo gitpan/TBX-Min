@@ -43,7 +43,9 @@
             "Carp" : "0",
             "Class::Accessor" : "0",
             "Data::Dumper" : "0",
+            "DateTime::Format::ISO8601" : "0",
             "Path::Tiny" : "0",
+            "Try::Tiny" : "0",
             "XML::Twig" : "0",
             "XML::Writer" : "0",
             "autodie" : "0",
@@ -59,6 +61,7 @@
             "File::Temp" : "0",
             "FindBin" : "0",
             "Test::Deep" : "0",
+            "Test::Exception" : "0",
             "Test::More" : "0.88",
             "Test::NoWarnings" : "0",
             "Test::XML" : "0"
@@ -68,19 +71,19 @@
    "provides" : {
       "TBX::Min" : {
          "file" : "lib/TBX/Min.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       },
       "TBX::Min::ConceptEntry" : {
          "file" : "lib/TBX/Min/ConceptEntry.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       },
       "TBX::Min::LangGroup" : {
          "file" : "lib/TBX/Min/LangGroup.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       },
       "TBX::Min::TermGroup" : {
          "file" : "lib/TBX/Min/TermGroup.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       }
    },
    "release_status" : "stable",
@@ -99,12 +102,13 @@
          "web" : "https://github.com/byutrg/p5-TBX-Min"
       }
    },
-   "version" : "0.01",
+   "version" : "0.02",
    "x_BuiltWith" : {
       "modules" : {
          "Carp" : "1.26",
          "Class::Accessor" : "0.34",
          "Data::Dumper" : "2.145",
+         "DateTime::Format::ISO8601" : "0.08",
          "File::Find" : "1.20",
          "File::Temp" : "0.2301",
          "FindBin" : "1.51",
@@ -113,11 +117,13 @@
          "Pod::Coverage::TrustPod" : "0.100002",
          "Test::CPAN::Meta" : "0.23",
          "Test::Deep" : "0.11",
+         "Test::Exception" : "0.31",
          "Test::More" : "0.98",
          "Test::NoWarnings" : "1.04",
          "Test::Pod" : "1.45",
          "Test::Pod::Coverage" : "1.08",
          "Test::XML" : "0.08",
+         "Try::Tiny" : "0.12",
          "XML::Twig" : "3.44",
          "XML::Writer" : "0.621",
          "autodie" : "2.16",

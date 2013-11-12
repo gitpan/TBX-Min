@@ -10,7 +10,7 @@ package TBX::Min::LangGroup;
 use strict;
 use warnings;
 use Carp;
-our $VERSION = '0.01'; # VERSION
+our $VERSION = '0.02'; # VERSION
 
 # ABSTRACT: Store information from one TBX-Min C<langGroup> element
 
@@ -63,7 +63,7 @@ TBX::Min::LangGroup - Store information from one TBX-Min C<langGroup> element
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -89,13 +89,14 @@ groups each representing a given concept for the same language.
 
 Creates a new C<TBX::Min::LangGroup> instance. Optionally you may pass in
 a hash reference which is used to initialize the object. The allowed hash
-fields are C<code> and C<term_groups>, where C<code> is the abbreviation of
-the language the contained terms belong to, and C<term_groups> is an array
-reference containing C<TBX::Min::LangGroup> objects.
+fields are C<code> and C<term_groups>, where C<code> corresponds to the
+method of the same name, and C<term_groups> is an array reference containing
+C<TBX::Min::LangGroup> objects.
 
 =head2 C<code>
 
-Get or set the language group language abbreviation (C<en>, C<de>, etc.).
+Get or set the language group language code (should be ISO 639 and 3166,
+e.g. C<en-US>, C<de>, etc.).
 
 =head2 C<term_groups>
 

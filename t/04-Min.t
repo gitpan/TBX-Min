@@ -3,8 +3,9 @@
 use strict;
 use warnings;
 use Test::More;
-plan tests => 27;
+plan tests => 31;
 use Test::NoWarnings;
+use Test::Exception;
 use Test::Deep;
 use_ok('TBX::Min');
 use TBX::Min::ConceptEntry;
@@ -12,9 +13,10 @@ use FindBin qw($Bin);
 use Path::Tiny;
 
 my $args = {
-    doc_lang => 'foo0',
-    title => 'foo1',
-    origin => 'foo2',
+    id => 'foo1',
+    description => 'foo8',
+    date_created => '2013-11-12T00:00:00',
+    creator => 'foo2',
     license => 'foo3',
     directionality => 'foo5',
     source_lang => 'foo6',
@@ -25,14 +27,14 @@ my $args = {
     ],
 };
 
-
 #test constructor without arguments
 my $min = TBX::Min->new();
 isa_ok($min, 'TBX::Min');
 
-ok(!$min->doc_lang, 'doc_lang not defined by default');
-ok(!$min->title, 'title not defined by default');
-ok(!$min->origin, 'origin not defined by default');
+ok(!$min->id, 'id not defined by default');
+ok(!$min->description, 'description not defined by default');
+ok(!$min->date_created, 'date_created not defined by default');
+ok(!$min->creator, 'creator not defined by default');
 ok(!$min->license, 'license not defined by default');
 ok(!$min->directionality, 'directionality not defined by default');
 ok(!$min->source_lang, 'source_lang not defined by default');
@@ -41,9 +43,12 @@ ok(!$min->concepts, 'concepts not defined by default');
 
 #test constructor with arguments
 $min = TBX::Min->new($args);
-is($min->doc_lang, $args->{doc_lang}, 'correct doc_lang from constructor');
-is($min->title, $args->{title}, 'correct title from constructor');
-is($min->origin, $args->{origin}, 'correct origin from constructor');
+is($min->id, $args->{id}, 'correct id from constructor');
+is($min->description, $args->{description},
+    'correct description from constructor');
+is($min->date_created, $args->{date_created},
+    'correct date_created from constructor');
+is($min->creator, $args->{creator}, 'correct creator from constructor');
 is($min->license, $args->{license}, 'correct license from constructor');
 is($min->directionality, $args->{directionality},
     'correct directionality from constructor');
@@ -56,14 +61,17 @@ cmp_deeply($min->concepts, $args->{concepts}, 'correct concepts from constructor
 #test setters
 $min = TBX::Min->new();
 
-$min->doc_lang($args->{doc_lang});
-is($min->doc_lang, $args->{doc_lang}, 'doc_lang correctly set');
+$min->id($args->{id});
+is($min->id, $args->{id}, 'id correctly set');
 
-$min->title($args->{title});
-is($min->title, $args->{title}, 'title correctly set');
+$min->description($args->{description});
+is($min->description, $args->{description}, 'description correctly set');
 
-$min->origin($args->{origin});
-is($min->origin, $args->{origin}, 'origin correctly set');
+$min->date_created($args->{date_created});
+is($min->date_created, $args->{date_created}, 'date_created correctly set');
+
+$min->creator($args->{creator});
+is($min->creator, $args->{creator}, 'creator correctly set');
 
 $min->license($args->{license});
 is($min->license, $args->{license}, 'license correctly set');
@@ -80,3 +88,8 @@ is($min->target_lang, $args->{target_lang}, 'target_lang correctly set');
 $min->add_concept($args->{concepts}->[0]);
 cmp_deeply($min->concepts->[0], $args->{concepts}->[0],
     'add_concepts works correctly');
+
+# check errors
+throws_ok {TBX::Min->new({date_created => 'stuff'})}
+    qr/date is not in ISO8601 format/,
+    'exception thrown for bad date';
