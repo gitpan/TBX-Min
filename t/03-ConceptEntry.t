@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::More;
-plan tests => 11;
+plan tests => 12;
 use Test::Deep;
 use Test::NoWarnings;
 use_ok('TBX::Min::ConceptEntry');
@@ -27,6 +27,8 @@ isa_ok($concept, 'TBX::Min::ConceptEntry');
 ok(!$concept->id, 'id not defined by default');
 ok(!$concept->subject_field,
     'subject_field not defined by default');
+is_deeply($concept->lang_groups, [],
+    'lang_groups returns empty array by default');
 
 #test constructor with arguments
 $concept = TBX::Min::ConceptEntry->new($args);

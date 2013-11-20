@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::More 0.88;
-plan tests => 43;
+plan tests => 44;
 use Test::NoWarnings;
 use TBX::Min;
 use FindBin qw($Bin);
@@ -17,6 +17,8 @@ test_read("$basic_path");
 
 note('reading XML string');
 test_read(\$basic_txt);
+
+test_empty_tbx();
 
 sub test_read {
     my ($input) = @_;
@@ -67,3 +69,9 @@ sub test_body {
         'correct note');
 }
 
+# simple check that "concepts" sub returns empty array, not undef
+sub test_empty_tbx {
+    my $empty_tbx = '<TBX dialect="TBX-Min"/>';
+    my $min = TBX::Min->new_from_xml(\$empty_tbx);
+    is_deeply($min->concepts, [], 'concepts returns [] by default');
+}

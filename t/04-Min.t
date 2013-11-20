@@ -39,7 +39,7 @@ ok(!$min->license, 'license not defined by default');
 ok(!$min->directionality, 'directionality not defined by default');
 ok(!$min->source_lang, 'source_lang not defined by default');
 ok(!$min->target_lang, 'target_lang not defined by default');
-ok(!$min->concepts, 'concepts not defined by default');
+cmp_deeply($min->concepts, [], 'concepts returns empty array by default');
 
 #test constructor with arguments
 $min = TBX::Min->new($args);

@@ -19,7 +19,7 @@ use TBX::Min::TermGroup;
 use XML::Writer;
 use DateTime::Format::ISO8601;
 use Try::Tiny;
-our $VERSION = '0.02'; # VERSION
+our $VERSION = '0.03'; # VERSION
 
 unless (caller){
 	use Data::Dumper;
@@ -77,7 +77,7 @@ sub new_from_xml {
 	# use handlers to process individual tags, then grab the result
 	$twig->parse($fh);
 	my $self = $twig->{tbx_min_att};
-	$self->{concepts} = $twig->{tbx_min_concepts};
+	$self->{concepts} = $twig->{tbx_min_concepts} || [];
 	bless $self, $class;
 	return $self;
 }
@@ -105,6 +105,7 @@ sub new {
     }else{
         $self = {};
     }
+    $self->{concepts} ||= [];
     return bless $self, $class;
 }
 
@@ -307,7 +308,7 @@ sub _date_created {
     my ($twig, $node) = @_;
     $twig->{tbx_min_att}->{date_created} =
         _parse_datetime($node->text);
-    return 1;
+    return;
 }
 
 # turn camelCase into camel_case
@@ -387,7 +388,7 @@ TBX::Min - Read, write and edit TBX-Min files
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::More;
-plan tests => 8;
+plan tests => 9;
 use Test::Deep;
 use Test::NoWarnings;
 use_ok('TBX::Min::LangGroup');
@@ -24,6 +24,8 @@ my $lang_grp = TBX::Min::LangGroup->new;
 isa_ok($lang_grp, 'TBX::Min::LangGroup');
 
 ok(!$lang_grp->code, 'language not defined by default');
+cmp_deeply($lang_grp->term_groups, [],
+    'term_groups returns empty array by default');
 
 #test constructor with arguments
 $lang_grp = TBX::Min::LangGroup->new($args);

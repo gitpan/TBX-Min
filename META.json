@@ -71,19 +71,19 @@
    "provides" : {
       "TBX::Min" : {
          "file" : "lib/TBX/Min.pm",
-         "version" : "0.02"
+         "version" : "0.03"
       },
       "TBX::Min::ConceptEntry" : {
          "file" : "lib/TBX/Min/ConceptEntry.pm",
-         "version" : "0.02"
+         "version" : "0.03"
       },
       "TBX::Min::LangGroup" : {
          "file" : "lib/TBX/Min/LangGroup.pm",
-         "version" : "0.02"
+         "version" : "0.03"
       },
       "TBX::Min::TermGroup" : {
          "file" : "lib/TBX/Min/TermGroup.pm",
-         "version" : "0.02"
+         "version" : "0.03"
       }
    },
    "release_status" : "stable",
@@ -102,7 +102,7 @@
          "web" : "https://github.com/byutrg/p5-TBX-Min"
       }
    },
-   "version" : "0.02",
+   "version" : "0.03",
    "x_BuiltWith" : {
       "modules" : {
          "Carp" : "1.26",

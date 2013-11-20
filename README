@@ -2,7 +2,7 @@ NAME
     TBX::Min - Read, write and edit TBX-Min files
 
 VERSION
-    version 0.02
+    version 0.03
 
 SYNOPSIS
             use TBX::Min;
