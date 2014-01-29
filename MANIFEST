@@ -10,7 +10,7 @@ Makefile.PL
 README
 dist.ini
 lib/TBX/Min.pm
-lib/TBX/Min/ConceptEntry.pm
+lib/TBX/Min/Entry.pm
 lib/TBX/Min/LangGroup.pm
 lib/TBX/Min/TermGroup.pm
 t/00-compile.t

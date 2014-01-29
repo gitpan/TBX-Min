@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 use Test::More;
-plan tests => 31;
+plan tests => 33;
 use Test::NoWarnings;
 use Test::Exception;
 use Test::Deep;
-use_ok('TBX::Min');
-use TBX::Min::ConceptEntry;
+use TBX::Min;
+use TBX::Min::Entry;
 use FindBin qw($Bin);
 use Path::Tiny;
 
@@ -18,12 +18,12 @@ my $args = {
     date_created => '2013-11-12T00:00:00',
     creator => 'foo2',
     license => 'foo3',
-    directionality => 'foo5',
+    directionality => 'bidirectional',
     source_lang => 'foo6',
     target_lang => 'foo7',
-    concepts => [
-        TBX::Min::ConceptEntry->new({id => 'foo'}),
-        TBX::Min::ConceptEntry->new({id => 'bar'}),
+    entries => [
+        TBX::Min::Entry->new({id => 'foo'}),
+        TBX::Min::Entry->new({id => 'bar'}),
     ],
 };
 
@@ -39,7 +39,7 @@ ok(!$min->license, 'license not defined by default');
 ok(!$min->directionality, 'directionality not defined by default');
 ok(!$min->source_lang, 'source_lang not defined by default');
 ok(!$min->target_lang, 'target_lang not defined by default');
-cmp_deeply($min->concepts, [], 'concepts returns empty array by default');
+cmp_deeply($min->entries, [], 'entries returns empty array by default');
 
 #test constructor with arguments
 $min = TBX::Min->new($args);
@@ -56,7 +56,7 @@ is($min->source_lang, $args->{source_lang},
     'correct source_lang from constructor');
 is($min->target_lang, $args->{target_lang},
     'correct target_lang from constructor');
-cmp_deeply($min->concepts, $args->{concepts}, 'correct concepts from constructor');
+cmp_deeply($min->entries, $args->{entries}, 'correct entries from constructor');
 
 #test setters
 $min = TBX::Min->new();
@@ -85,11 +85,37 @@ is($min->source_lang, $args->{source_lang}, 'source_lang correctly set');
 $min->target_lang($args->{target_lang});
 is($min->target_lang, $args->{target_lang}, 'target_lang correctly set');
 
-$min->add_concept($args->{concepts}->[0]);
-cmp_deeply($min->concepts->[0], $args->{concepts}->[0],
-    'add_concepts works correctly');
+$min->add_concept($args->{entries}->[0]);
+cmp_deeply($min->entries->[0], $args->{entries}->[0],
+    'add_entries works correctly');
 
 # check errors
 throws_ok {TBX::Min->new({date_created => 'stuff'})}
     qr/date is not in ISO8601 format/,
     'exception thrown for bad date';
+
+#check validation of directionality value
+for my $dir (qw(monodirectional bidirectional)){
+    subtest "$dir is a valid directionality value" => sub {
+        plan tests => 2;
+        lives_ok {
+            TBX::Min->new({directionality => $dir});
+        } 'constructor';
+        lives_ok {
+            $min = TBX::Min->new();
+            $min->directionality($dir);
+        } 'accessor';
+    };
+}
+
+subtest 'foo is not a legal directionality value' => sub {
+    plan tests => 2;
+    my $error = qr/illegal directionality 'foo'/i;
+    throws_ok {
+        $min = TBX::Min->new({directionality => 'foo'});
+    } $error, 'constructor';
+    throws_ok {
+        $min = TBX::Min->new();
+        $min->directionality('foo');
+    } $error, 'accessor';
+};

@@ -10,7 +10,7 @@ package TBX::Min::LangGroup;
 use strict;
 use warnings;
 use Carp;
-our $VERSION = '0.03'; # VERSION
+our $VERSION = '0.04'; # VERSION
 
 # ABSTRACT: Store information from one TBX-Min C<langGroup> element
 
@@ -64,7 +64,7 @@ TBX::Min::LangGroup - Store information from one TBX-Min C<langGroup> element
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 

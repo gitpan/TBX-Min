@@ -13,73 +13,77 @@ use XML::Twig;
 use autodie;
 use Path::Tiny;
 use Carp;
-use TBX::Min::ConceptEntry;
+use TBX::Min::Entry;
 use TBX::Min::LangGroup;
 use TBX::Min::TermGroup;
 use XML::Writer;
 use DateTime::Format::ISO8601;
 use Try::Tiny;
-our $VERSION = '0.03'; # VERSION
+our $VERSION = '0.04'; # VERSION
 
 unless (caller){
-	use Data::Dumper;
-	print Dumper __PACKAGE__->new(@ARGV);
+    require Data::Dumper;
+    print Dumper __PACKAGE__->new(@ARGV);
 
 }
 
 # ABSTRACT: Read, write and edit TBX-Min files
 
 sub new_from_xml {
-	my ($class, $data) = @_;
+    my ($class, $data) = @_;
 
-	my $fh = _get_handle($data);
+    if(!$data){
+        croak 'missing required data argument';
+    }
 
-	# build a twig out of the input document
-	my $twig = XML::Twig->new(
-		# pretty_print    => 'nice', #this seems to affect other created twigs, too
-		# output_encoding => 'UTF-8',
-		# do_not_chain_handlers => 1, #can be important when things get complicated
-		keep_spaces		=> 0,
+    my $fh = _get_handle($data);
 
-        # these store new conceptEntries, langGroups and termGroups
+    # build a twig out of the input document
+    my $twig = XML::Twig->new(
+        # pretty_print    => 'nice', #this seems to affect other created twigs, too
+        # output_encoding => 'UTF-8',
+        # do_not_chain_handlers => 1, #can be important when things get complicated
+        keep_spaces     => 0,
+
+        # these store new entries, langGroups and termGroups
         start_tag_handlers => {
-            conceptEntry => \&_conceptStart,
+            entry => \&_conceptStart,
             langGroup => \&_langStart,
             termGroup => \&_termGrpStart,
         },
 
-		TwigHandlers    => {
-			# header attributes become attributes of the TBX::Min object
+        TwigHandlers    => {
+            # header attributes become attributes of the TBX::Min object
             id => \&_headerAtt,
             description => \&_headerAtt,
             dateCreated => \&_date_created,
             creator => \&_headerAtt,
             license => \&_headerAtt,
-            directionality => \&_headerAtt,
+            directionality => \&_directionality,
             languages => \&_languages,
 
-            # becomes part of the current TBX::Min::ConceptEntry object
-			subjectField => sub {
-                shift->{tbx_min_concepts}->[-1]->subject_field($_->text)},
+            # becomes part of the current TBX::Min::Entry object
+            subjectField => sub {
+                shift->{tbx_min_entries}->[-1]->subject_field($_->text)},
 
-			# these become attributes of the current TBX::Min::TermGroup object
-			term => sub {shift->{tbx_min_current_term_grp}->term($_->text)},
-			partOfSpeech => sub {
-				shift->{tbx_min_current_term_grp}->part_of_speech($_->text)},
-			note => sub {shift->{tbx_min_current_term_grp}->note($_->text)},
-			customer => sub {
-				shift->{tbx_min_current_term_grp}->customer($_->text)},
-			termStatus => sub {
-				shift->{tbx_min_current_term_grp}->status($_->text)},
-		}
-	);
+            # these become attributes of the current TBX::Min::TermGroup object
+            term => sub {shift->{tbx_min_current_term_grp}->term($_->text)},
+            partOfSpeech => sub {
+                shift->{tbx_min_current_term_grp}->part_of_speech($_->text)},
+            note => sub {shift->{tbx_min_current_term_grp}->note($_->text)},
+            customer => sub {
+                shift->{tbx_min_current_term_grp}->customer($_->text)},
+            termStatus => sub {
+                shift->{tbx_min_current_term_grp}->status($_->text)},
+        }
+    );
 
-	# use handlers to process individual tags, then grab the result
-	$twig->parse($fh);
-	my $self = $twig->{tbx_min_att};
-	$self->{concepts} = $twig->{tbx_min_concepts} || [];
-	bless $self, $class;
-	return $self;
+    # use handlers to process individual tags, then grab the result
+    $twig->parse($fh);
+    my $self = $twig->{tbx_min_att};
+    $self->{entries} = $twig->{tbx_min_entries} || [];
+    bless $self, $class;
+    return $self;
 }
 
 sub _get_handle {
@@ -101,11 +105,14 @@ sub new {
         if(my $dt_string = $args->{date_created}){
             $args->{date_created} = _parse_datetime($dt_string);
         }
+        if(exists $args->{directionality}){
+            _validate_dir($args->{directionality});
+        }
         $self = $args;
     }else{
         $self = {};
     }
-    $self->{concepts} ||= [];
+    $self->{entries} ||= [];
     return bless $self, $class;
 }
 
@@ -166,11 +173,21 @@ sub license {
 
 sub directionality {
     my ($self, $directionality) = @_;
-    if($directionality) {
+    if(defined $directionality) {
+        _validate_dir($directionality);
         return $self->{directionality} = $directionality;
     }
     return $self->{directionality};
 }
+
+sub _validate_dir {
+    my ($dir) = @_;
+    if($dir ne 'bidirectional' and $dir ne 'monodirectional'){
+        croak "Illegal directionality '$dir'";
+    }
+    return;
+}
+
 
 sub source_lang {
     my ($self, $source_lang) = @_;
@@ -188,20 +205,20 @@ sub target_lang {
     return $self->{target_lang};
 }
 
-sub concepts { ## no critic(RequireArgUnpacking)
+sub entries { ## no critic(RequireArgUnpacking)
     my ($self) = @_;
     if (@_ > 1){
-        croak 'extra argument found (concepts is a getter only)';
+        croak 'extra argument found (entries is a getter only)';
     }
-    return $self->{concepts};
+    return $self->{entries};
 }
 
 sub add_concept {
     my ($self, $concept) = @_;
-    if( !$concept || !$concept->isa('TBX::Min::ConceptEntry') ){
-        croak 'argument to add_concept should be a TBx::Min::ConceptEntry';
+    if( !$concept || !$concept->isa('TBX::Min::Entry') ){
+        croak 'argument to add_concept should be a TBx::Min::Entry';
     }
-    push @{$self->{concepts}}, $concept;
+    push @{$self->{entries}}, $concept;
     return;
 }
 
@@ -219,10 +236,10 @@ sub as_xml {
         $writer->characters($self->{$header_att});
         $writer->endTag;
     }
-    if($self->{source_lang} || $self->{target_lang}){
+    if($self->source_lang || $self->target_lang){
         my @atts;
-        push @atts, (source => $self->{source_lang}) if $self->{source_lang};
-        push @atts, (target => $self->{target_lang}) if $self->{target_lang};
+        push @atts, (source => $self->source_lang) if $self->source_lang;
+        push @atts, (target => $self->target_lang) if $self->target_lang;
         $writer->emptyTag('languages', @atts);
     }
     if(my $dt = $self->{date_created}){
@@ -234,8 +251,8 @@ sub as_xml {
 
     $writer->startTag('body');
 
-    for my $concept (@{$self->concepts}){
-        $writer->startTag('conceptEntry',
+    for my $concept (@{$self->entries}){
+        $writer->startTag('entry',
             $concept->id ? (id => $concept->id) : ());
         if(my $sf = $concept->subject_field){
             $writer->startTag('subjectField');
@@ -282,7 +299,7 @@ sub as_xml {
             }
             $writer->endTag; # langGroup
         }
-        $writer->endTag; # conceptEntry
+        $writer->endTag; # entry
     }
 
     $writer->endTag; # body
@@ -299,9 +316,16 @@ sub as_xml {
 # but it works.
 
 sub _headerAtt {
-	my ($twig, $node) = @_;
-	$twig->{tbx_min_att}->{_decamel($node->name)} = $node->text;
-	return 1;
+    my ($twig, $node) = @_;
+    $twig->{tbx_min_att}->{_decamel($node->name)} = $node->text;
+    return 1;
+}
+
+sub _directionality {
+    my ($twig, $node) = @_;
+    _validate_dir($node->text);
+    $twig->{tbx_min_att}->{directionality} = $node->text;
+    return 1;
 }
 
 sub _date_created {
@@ -313,39 +337,39 @@ sub _date_created {
 
 # turn camelCase into camel_case
 sub _decamel {
-	my ($camel) = @_;
-	$camel =~ s/([A-Z])/_\l$1/g;
-	return $camel;
+    my ($camel) = @_;
+    $camel =~ s/([A-Z])/_\l$1/g;
+    return $camel;
 }
 
 sub _languages{
-	my ($twig, $node) = @_;
-	if(my $source = $node->att('source')){
-		${ $twig->{'tbx_min_att'} }{'source_lang'} = $source;
-	}
-	if(my $target = $node->att('target')){
-		${ $twig->{'tbx_min_att'} }{'target_lang'} = $target;
-	}
-	return 1;
+    my ($twig, $node) = @_;
+    if(my $source = $node->att('source')){
+        ${ $twig->{'tbx_min_att'} }{'source_lang'} = $source;
+    }
+    if(my $target = $node->att('target')){
+        ${ $twig->{'tbx_min_att'} }{'target_lang'} = $target;
+    }
+    return 1;
 }
 
 # add a new concept entry to the list of those found in this file
 sub _conceptStart {
-	my ($twig, $node) = @_;
-	my $concept = TBX::Min::ConceptEntry->new();
-	if($node->att('id')){
-		$concept->id($node->att('id'));
-	}else{
-		carp 'found conceptEntry missing id attribute';
-	}
-	push @{ $twig->{tbx_min_concepts} }, $concept;
-	return 1;
+    my ($twig, $node) = @_;
+    my $concept = TBX::Min::Entry->new();
+    if($node->att('id')){
+        $concept->id($node->att('id'));
+    }else{
+        carp 'found entry missing id attribute';
+    }
+    push @{ $twig->{tbx_min_entries} }, $concept;
+    return 1;
 }
 
 #just set the subject_field of the current concept
 sub _subjectField {
-	my ($twig, $node) = @_;
-    $twig->{tbx_min_concepts}->[-1]->
+    my ($twig, $node) = @_;
+    $twig->{tbx_min_entries}->[-1]->
         subject_field($node->text);
     return 1;
 }
@@ -354,26 +378,26 @@ sub _subjectField {
 # and set it as the current LangGroup.
 sub _langStart {
     my ($twig, $node) = @_;
-	my $lang = TBX::Min::LangGroup->new();
-	if($node->att('xml:lang')){
-		$lang->code($node->att('xml:lang'));
-	}else{
-		carp 'found langGroup missing xml:lang attribute';
-	}
+    my $lang = TBX::Min::LangGroup->new();
+    if($node->att('xml:lang')){
+        $lang->code($node->att('xml:lang'));
+    }else{
+        carp 'found langGroup missing xml:lang attribute';
+    }
 
-	$twig->{tbx_min_concepts}->[-1]->add_lang_group($lang);
-	$twig->{tbx_min_current_lang_grp} = $lang;
-	return 1;
+    $twig->{tbx_min_entries}->[-1]->add_lang_group($lang);
+    $twig->{tbx_min_current_lang_grp} = $lang;
+    return 1;
 }
 
 # Create a new termGroup, add it to the current langGroup,
 # and set it as the current termGroup.
 sub _termGrpStart {
-	my ($twig) = @_;
-	my $term = TBX::Min::TermGroup->new();
-	$twig->{tbx_min_current_lang_grp}->add_term_group($term);
-	$twig->{tbx_min_current_term_grp} = $term;
-	return 1;
+    my ($twig) = @_;
+    my $term = TBX::Min::TermGroup->new();
+    $twig->{tbx_min_current_lang_grp}->add_term_group($term);
+    $twig->{tbx_min_current_term_grp} = $term;
+    return 1;
 }
 
 1;
@@ -388,13 +412,13 @@ TBX::Min - Read, write and edit TBX-Min files
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
-	use TBX::Min;
-	my $min = TBX::Min->new('/path/to/file.tbx');
-	my $concepts = $min->concepts;
+    use TBX::Min;
+    my $min = TBX::Min->new('/path/to/file.tbx');
+    my $entries = $min->entries;
 
 =head1 DESCRIPTION
 
@@ -416,8 +440,8 @@ Creates a new C<TBX::Min> instance. Optionally you may pass in
 a hash reference which is used to initialize the object. The allowed hash
 fields are C<id>, C<description>, C<date_created>, C<creator>, C<license>,
 C<directionality>, C<source_lang> and C<target_lang>, which correspond to
-methods of the same name, and C<concepts>, which should be an array reference
-containing C<TBX::Min::ConceptEntry> objects. This method croaks if
+methods of the same name, and C<entries>, which should be an array reference
+containing C<TBX::Min::Entry> objects. This method croaks if
 C<date_created> is not in ISO 8601 format.
 
 =head2 C<id>
@@ -458,9 +482,9 @@ be ISO 639 and 3166 (e.g. C<en-US>, C<de>, etc.).
 Get or set the code representing the document target language. This should
 be ISO 639 and 3166 (e.g. C<en-US>, C<de>, etc.).
 
-=head2 C<concepts>
+=head2 C<entries>
 
-Returns an array ref containing the C<TBX::Min::ConceptEntry> objects contained
+Returns an array ref containing the C<TBX::Min::Entry> objects contained
 in the document.The array ref is the same one used to store the objects
 internally, so additions or removals from the array will be reflected in future
 calls to this method.

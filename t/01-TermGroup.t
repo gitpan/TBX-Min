@@ -3,18 +3,19 @@
 use strict;
 use warnings;
 use Test::More;
-plan tests => 18;
+plan tests => 29;
 use Test::NoWarnings;
-use_ok('TBX::Min::TermGroup');
+use Test::Exception;
+use TBX::Min::TermGroup;
 use FindBin qw($Bin);
 use Path::Tiny;
 
 my $args = {
     term => 'foo1',
-    part_of_speech => 'foo2',
+    part_of_speech => 'noun',
     note => 'foo3',
     customer => 'foo4',
-    status => 'foo5',
+    status => 'preferred',
 };
 
 
@@ -54,3 +55,55 @@ is($term_grp->customer, $args->{customer}, 'customer correctly set');
 
 $term_grp->status($args->{status});
 is($term_grp->status, $args->{status}, 'status correctly set');
+
+# check validity of part_of_speech picklist values
+for my $pos(qw(noun properNoun verb adjective adverb other)) {
+    subtest "$pos is a legal part_of_speech value" => sub {
+        plan tests => 2;
+        lives_ok {
+            $term_grp = TBX::Min::TermGroup->new(part_of_speech => $pos);
+        } 'constructor';
+        lives_ok {
+            $term_grp = TBX::Min::TermGroup->new();
+            $term_grp->part_of_speech($pos);
+        } 'accessor';
+    };
+}
+
+subtest 'foo is not a legal part_of_speech value' => sub {
+    plan tests => 2;
+    my $error = qr/illegal part of speech 'foo'/i;
+    throws_ok {
+        $term_grp = TBX::Min::TermGroup->new(part_of_speech => 'foo');
+    } $error, 'constructor';
+    throws_ok {
+        $term_grp = TBX::Min::TermGroup->new();
+        $term_grp->part_of_speech('foo');
+    } $error, 'accessor';
+};
+
+# check validity of status picklist values
+for my $status(qw(admitted preferred notRecommended obsolete)) {
+    subtest "$status is a legal status value" => sub {
+        plan tests => 2;
+        lives_ok {
+            $term_grp = TBX::Min::TermGroup->new(status => $status);
+        } 'constructor';
+        lives_ok {
+            $term_grp = TBX::Min::TermGroup->new();
+            $term_grp->status($status);
+        } 'accessor';
+    };
+}
+
+subtest 'foo is not a legal status value' => sub {
+    plan tests => 2;
+    my $error = qr/illegal status 'foo'/i;
+    throws_ok {
+        $term_grp = TBX::Min::TermGroup->new(status => 'foo');
+    } $error, 'constructor';
+    throws_ok {
+        $term_grp = TBX::Min::TermGroup->new();
+        $term_grp->status('foo');
+    } $error, 'accessor';
+};

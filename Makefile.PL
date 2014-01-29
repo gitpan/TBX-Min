@@ -23,7 +23,7 @@ my %WriteMakefileArgs = (
   "NAME" => "TBX::Min",
   "PREREQ_PM" => {
     "Carp" => 0,
-    "Class::Accessor" => 0,
+    "Class::Tiny" => 0,
     "Data::Dumper" => 0,
     "DateTime::Format::ISO8601" => 0,
     "Path::Tiny" => 0,
@@ -31,8 +31,8 @@ my %WriteMakefileArgs = (
     "XML::Twig" => 0,
     "XML::Writer" => 0,
     "autodie" => 0,
-    "parent" => 0,
     "strict" => 0,
+    "subs" => 0,
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
@@ -45,7 +45,7 @@ my %WriteMakefileArgs = (
     "Test::NoWarnings" => 0,
     "Test::XML" => 0
   },
-  "VERSION" => "0.03",
+  "VERSION" => "0.04",
   "test" => {
     "TESTS" => "t/*.t"
   }

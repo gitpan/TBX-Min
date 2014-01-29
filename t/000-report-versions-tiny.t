@@ -49,7 +49,7 @@ sub pmver {
 }
 
 eval { $v .= pmver('Carp','any version') };
-eval { $v .= pmver('Class::Accessor','any version') };
+eval { $v .= pmver('Class::Tiny','any version') };
 eval { $v .= pmver('Data::Dumper','any version') };
 eval { $v .= pmver('DateTime::Format::ISO8601','any version') };
 eval { $v .= pmver('File::Find','any version') };
@@ -70,8 +70,8 @@ eval { $v .= pmver('Try::Tiny','any version') };
 eval { $v .= pmver('XML::Twig','any version') };
 eval { $v .= pmver('XML::Writer','any version') };
 eval { $v .= pmver('autodie','any version') };
-eval { $v .= pmver('parent','any version') };
 eval { $v .= pmver('strict','any version') };
+eval { $v .= pmver('subs','any version') };
 eval { $v .= pmver('version','0.9901') };
 eval { $v .= pmver('warnings','any version') };
 

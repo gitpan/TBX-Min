@@ -1,12 +1,12 @@
-# test the functionality of TBX::Min::ConceptEntry
+# test the functionality of TBX::Min::Entry
 
 use strict;
 use warnings;
 use Test::More;
-plan tests => 12;
+plan tests => 11;
 use Test::Deep;
 use Test::NoWarnings;
-use_ok('TBX::Min::ConceptEntry');
+use TBX::Min::Entry;
 use TBX::Min::LangGroup;
 use FindBin qw($Bin);
 use Path::Tiny;
@@ -21,8 +21,8 @@ my $args = {
 };
 
 #test constructor without arguments
-my $concept = TBX::Min::ConceptEntry->new;
-isa_ok($concept, 'TBX::Min::ConceptEntry');
+my $concept = TBX::Min::Entry->new;
+isa_ok($concept, 'TBX::Min::Entry');
 
 ok(!$concept->id, 'id not defined by default');
 ok(!$concept->subject_field,
@@ -31,7 +31,7 @@ is_deeply($concept->lang_groups, [],
     'lang_groups returns empty array by default');
 
 #test constructor with arguments
-$concept = TBX::Min::ConceptEntry->new($args);
+$concept = TBX::Min::Entry->new($args);
 is($concept->id, $args->{id}, 'correct id from constructor');
 is($concept->subject_field, $args->{subject_field},
     'correct subject_field from constructor');
@@ -39,7 +39,7 @@ cmp_deeply($concept->lang_groups, $args->{lang_groups},
     'correct term groups from constructor');
 
 #test setters
-$concept = TBX::Min::ConceptEntry->new();
+$concept = TBX::Min::Entry->new();
 
 $concept->id($args->{id});
 is($concept->id, $args->{id}, 'id correctly set');

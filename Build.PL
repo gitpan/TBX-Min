@@ -17,14 +17,14 @@ my %module_build_args = (
     "Nathan Glenn <garfieldnate\@gmail.com>"
   ],
   "dist_name" => "TBX-Min",
-  "dist_version" => "0.03",
+  "dist_version" => "0.04",
   "license" => "perl",
   "module_name" => "TBX::Min",
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
     "Carp" => 0,
-    "Class::Accessor" => 0,
+    "Class::Tiny" => 0,
     "Data::Dumper" => 0,
     "DateTime::Format::ISO8601" => 0,
     "Path::Tiny" => 0,
@@ -32,9 +32,9 @@ my %module_build_args = (
     "XML::Twig" => 0,
     "XML::Writer" => 0,
     "autodie" => 0,
-    "parent" => 0,
     "perl" => "5.006",
     "strict" => 0,
+    "subs" => 0,
     "warnings" => 0
   },
   "script_files" => [],

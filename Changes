@@ -1,5 +1,7 @@
 Revision history for TBX-Min
 
+0.04      2014-01-28 19:27:39 America/Los_Angeles
+    "conceptEntry" element changed to "entry"
 0.03      2013-11-19 16:50:25 America/Los_Angeles
     Uninitialized arrays are now returned as [] instead of undef
 0.02      2013-11-12 14:07:47 America/Los_Angeles

@@ -10,7 +10,7 @@
         <license>CC BY license can be freely copied and modified</license>
     </header>
     <body>
-        <conceptEntry id="C002">
+        <entry id="C002">
             <subjectField>biology</subjectField>
             <langGroup xml:lang="de">
                 <termGroup>
@@ -27,14 +27,14 @@
                 </termGroup>
                 <termGroup>
                     <term>hound</term>
-                    <termStatus>deprecated</termStatus>
+                    <termStatus>obsolete</termStatus>
                     <partOfSpeech>noun</partOfSpeech>
                     <customer>SAP</customer>
                     <note>however bloodhound is used rather than blooddog</note>
                 </termGroup>
             </langGroup>
-        </conceptEntry>
-        <conceptEntry id="c008">
+        </entry>
+        <entry id="c008">
             <subjectField>biology</subjectField>
             <langGroup xml:lang="de">
                 <termGroup>
@@ -49,8 +49,8 @@
                     <customer>SAP</customer>
                 </termGroup>
             </langGroup>
-        </conceptEntry>
-        <conceptEntry id="C007">
+        </entry>
+        <entry id="C007">
             <subjectField>biology</subjectField>
             <langGroup xml:lang="de">
                 <termGroup>
@@ -65,6 +65,6 @@
                     <customer>PestGone</customer>
                 </termGroup>
             </langGroup>
-        </conceptEntry>
+        </entry>
     </body>
 </TBX>

@@ -2,12 +2,12 @@ NAME
     TBX::Min - Read, write and edit TBX-Min files
 
 VERSION
-    version 0.03
+    version 0.04
 
 SYNOPSIS
-            use TBX::Min;
-            my $min = TBX::Min->new('/path/to/file.tbx');
-            my $concepts = $min->concepts;
+        use TBX::Min;
+        my $min = TBX::Min->new('/path/to/file.tbx');
+        my $entries = $min->entries;
 
 DESCRIPTION
     TBX-Min is a minimal, DCT-style dialect of TBX. This module allows you
@@ -24,9 +24,9 @@ METHODS
     reference which is used to initialize the object. The allowed hash
     fields are "id", "description", "date_created", "creator", "license",
     "directionality", "source_lang" and "target_lang", which correspond to
-    methods of the same name, and "concepts", which should be an array
-    reference containing "TBX::Min::ConceptEntry" objects. This method
-    croaks if "date_created" is not in ISO 8601 format.
+    methods of the same name, and "entries", which should be an array
+    reference containing "TBX::Min::Entry" objects. This method croaks if
+    "date_created" is not in ISO 8601 format.
 
   "id"
     Get or set the document id. This should be a unique string identifying
@@ -58,11 +58,11 @@ METHODS
     Get or set the code representing the document target language. This
     should be ISO 639 and 3166 (e.g. "en-US", "de", etc.).
 
-  "concepts"
-    Returns an array ref containing the "TBX::Min::ConceptEntry" objects
-    contained in the document.The array ref is the same one used to store
-    the objects internally, so additions or removals from the array will be
-    reflected in future calls to this method.
+  "entries"
+    Returns an array ref containing the "TBX::Min::Entry" objects contained
+    in the document.The array ref is the same one used to store the objects
+    internally, so additions or removals from the array will be reflected in
+    future calls to this method.
 
   "add_concept"
     Adds the input "TBX::Min::LangGroup" object to the list of language

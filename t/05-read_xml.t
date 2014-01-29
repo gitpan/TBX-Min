@@ -42,11 +42,11 @@ sub test_header {
 
 sub test_body {
     my ($min) = @_;
-    my $concepts = $min->concepts;
-    is(scalar @$concepts, 3, 'found three concepts');
+    my $entries = $min->entries;
+    is(scalar @$entries, 3, 'found three entries');
 
-    my $concept = $concepts->[0];
-    isa_ok($concept, 'TBX::Min::ConceptEntry');
+    my $concept = $entries->[0];
+    isa_ok($concept, 'TBX::Min::Entry');
     is($concept->id, 'C002', 'correct concept ID');
     is($concept->subject_field, 'biology',
         'correct concept subject field');
@@ -63,15 +63,15 @@ sub test_body {
     isa_ok($term, 'TBX::Min::TermGroup');
     is($term->term, 'hound', 'correct term text');
     is($term->part_of_speech, 'noun', 'correct part of speech');
-    is($term->status, 'deprecated', 'correct status');
+    is($term->status, 'obsolete', 'correct status');
     is($term->customer, 'SAP', 'correct customer');
     is($term->note, 'however bloodhound is used rather than blooddog',
         'correct note');
 }
 
-# simple check that "concepts" sub returns empty array, not undef
+# simple check that "entries" sub returns empty array, not undef
 sub test_empty_tbx {
     my $empty_tbx = '<TBX dialect="TBX-Min"/>';
     my $min = TBX::Min->new_from_xml(\$empty_tbx);
-    is_deeply($min->concepts, [], 'concepts returns [] by default');
+    is_deeply($min->entries, [], 'entries returns [] by default');
 }

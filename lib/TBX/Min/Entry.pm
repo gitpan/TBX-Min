@@ -6,13 +6,13 @@
 # This is free software; you can redistribute it and/or modify it under
 # the same terms as the Perl 5 programming language system itself.
 #
-package TBX::Min::ConceptEntry;
+package TBX::Min::Entry;
 use strict;
 use warnings;
 use Carp;
-our $VERSION = '0.03'; # VERSION
+our $VERSION = '0.04'; # VERSION
 
-# ABSTRACT: Store information from one TBX-Min C<conceptEntry> element
+# ABSTRACT: Store information from one TBX-Min C<entry> element
 
 sub new {
     my ($class, $args) = @_;
@@ -68,17 +68,17 @@ __END__
 
 =head1 NAME
 
-TBX::Min::ConceptEntry - Store information from one TBX-Min C<conceptEntry> element
+TBX::Min::Entry - Store information from one TBX-Min C<entry> element
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
-    use TBX::Min::ConceptEntry;
+    use TBX::Min::Entry;
     use TBX::Min::LangGroup;
-    my $concept = TBX::Min::ConceptEntry->new(
+    my $concept = TBX::Min::Entry->new(
         {id => 'B001'});
     print $concept->id(); # 'B001'
     my $lang_grp = TBX::Min::LangGroup->new({code => 'en'});
@@ -96,7 +96,7 @@ represent this concept in a given languages.
 
 =head2 C<new>
 
-Creates a new C<TBX::Min::ConceptEntry> instance. Optionally you may pass in
+Creates a new C<TBX::Min::Entry> instance. Optionally you may pass in
 a hash reference which is used to initialize the object. The allowed hash
 fields are C<id>, C<subject_field> and C<lang_groups>, where C<id> and
 C<subject_field> correspond to methods of the same name, and C<langGroups> is
