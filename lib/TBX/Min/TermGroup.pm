@@ -19,7 +19,7 @@ use Class::Tiny qw(
 );
 use Carp;
 
-our $VERSION = '0.04'; # VERSION
+our $VERSION = '0.05'; # VERSION
 
 # ABSTRACT: Store information from one TBX-Min C<termGroup> element
 
@@ -85,7 +85,7 @@ TBX::Min::TermGroup - Store information from one TBX-Min C<termGroup> element
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 

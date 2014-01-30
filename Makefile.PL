@@ -24,12 +24,10 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "Carp" => 0,
     "Class::Tiny" => 0,
-    "Data::Dumper" => 0,
     "DateTime::Format::ISO8601" => 0,
     "Path::Tiny" => 0,
     "Try::Tiny" => 0,
     "XML::Twig" => 0,
-    "XML::Writer" => 0,
     "autodie" => 0,
     "strict" => 0,
     "subs" => 0,
@@ -45,7 +43,7 @@ my %WriteMakefileArgs = (
     "Test::NoWarnings" => 0,
     "Test::XML" => 0
   },
-  "VERSION" => "0.04",
+  "VERSION" => "0.05",
   "test" => {
     "TESTS" => "t/*.t"
   }

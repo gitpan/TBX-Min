@@ -1,5 +1,10 @@
 Revision history for TBX-Min
 
+0.05      2014-01-30 14:55:25 America/Los_Angeles
+    Fixed warning on 5.10.X
+    add_concept changed to add_entry as should have been done in 0.04
+    as_xml returns pretty-printed XML
+    as_xml return scalar ref instead of just scalar
 0.04      2014-01-28 19:27:39 America/Los_Angeles
     "conceptEntry" element changed to "entry"
 0.03      2013-11-19 16:50:25 America/Los_Angeles

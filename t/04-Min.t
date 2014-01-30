@@ -85,7 +85,7 @@ is($min->source_lang, $args->{source_lang}, 'source_lang correctly set');
 $min->target_lang($args->{target_lang});
 is($min->target_lang, $args->{target_lang}, 'target_lang correctly set');
 
-$min->add_concept($args->{entries}->[0]);
+$min->add_entry($args->{entries}->[0]);
 cmp_deeply($min->entries->[0], $args->{entries}->[0],
     'add_entries works correctly');
 

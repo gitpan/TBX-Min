@@ -50,7 +50,6 @@ sub pmver {
 
 eval { $v .= pmver('Carp','any version') };
 eval { $v .= pmver('Class::Tiny','any version') };
-eval { $v .= pmver('Data::Dumper','any version') };
 eval { $v .= pmver('DateTime::Format::ISO8601','any version') };
 eval { $v .= pmver('File::Find','any version') };
 eval { $v .= pmver('File::Temp','any version') };
@@ -68,7 +67,6 @@ eval { $v .= pmver('Test::Pod::Coverage','1.08') };
 eval { $v .= pmver('Test::XML','any version') };
 eval { $v .= pmver('Try::Tiny','any version') };
 eval { $v .= pmver('XML::Twig','any version') };
-eval { $v .= pmver('XML::Writer','any version') };
 eval { $v .= pmver('autodie','any version') };
 eval { $v .= pmver('strict','any version') };
 eval { $v .= pmver('subs','any version') };

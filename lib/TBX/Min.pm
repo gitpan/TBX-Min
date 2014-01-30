@@ -16,16 +16,9 @@ use Carp;
 use TBX::Min::Entry;
 use TBX::Min::LangGroup;
 use TBX::Min::TermGroup;
-use XML::Writer;
 use DateTime::Format::ISO8601;
 use Try::Tiny;
-our $VERSION = '0.04'; # VERSION
-
-unless (caller){
-    require Data::Dumper;
-    print Dumper __PACKAGE__->new(@ARGV);
-
-}
+our $VERSION = '0.05'; # VERSION
 
 # ABSTRACT: Read, write and edit TBX-Min files
 
@@ -213,100 +206,89 @@ sub entries { ## no critic(RequireArgUnpacking)
     return $self->{entries};
 }
 
-sub add_concept {
-    my ($self, $concept) = @_;
-    if( !$concept || !$concept->isa('TBX::Min::Entry') ){
-        croak 'argument to add_concept should be a TBx::Min::Entry';
+sub add_entry {
+    my ($self, $entry) = @_;
+    if( !$entry || !$entry->isa('TBX::Min::Entry') ){
+        croak 'argument to add_entry should be a TBx::Min::Entry';
     }
-    push @{$self->{entries}}, $concept;
+    push @{$self->{entries}}, $entry;
     return;
 }
 
 sub as_xml {
     my ($self) = @_;
-    my $xml;
-    my $writer = XML::Writer->new(
-        OUTPUT => \$xml, NEWLINES => 1, ENCODING => 'utf-8');
-    $writer->startTag('TBX', dialect => 'TBX-Min');
 
-    $writer->startTag('header');
-    for my $header_att (qw(id creator license directionality description)){
+    # construct the whole document using XML::Twig::El's
+    my $root = XML::Twig::Elt->new(TBX => {dialect => 'TBX-Min'});
+    my $header = XML::Twig::Elt->new('header')->paste($root);
+
+    # each of these header elements is a simple element with text
+    for my $header_att (
+            qw(id creator license directionality description)){
         next unless $self->{$header_att};
-        $writer->startTag($header_att);
-        $writer->characters($self->{$header_att});
-        $writer->endTag;
+        XML::Twig::Elt->new($header_att,
+            $self->{$header_att})->paste(last_child => $header);
     }
     if($self->source_lang || $self->target_lang){
         my @atts;
         push @atts, (source => $self->source_lang) if $self->source_lang;
         push @atts, (target => $self->target_lang) if $self->target_lang;
-        $writer->emptyTag('languages', @atts);
+        XML::Twig::Elt->new(languages => {@atts})->paste(
+            last_child => $header)
     }
     if(my $dt = $self->{date_created}){
-        $writer->startTag('dateCreated');
-        $writer->characters($dt->iso8601);
-        $writer->endTag;
+        XML::Twig::Elt->new(dateCreated => $dt->iso8601)->paste(
+            last_child => $header);
     }
-    $writer->endTag; # header
 
-    $writer->startTag('body');
-
-    for my $concept (@{$self->entries}){
-        $writer->startTag('entry',
-            $concept->id ? (id => $concept->id) : ());
-        if(my $sf = $concept->subject_field){
-            $writer->startTag('subjectField');
-            $writer->characters($sf);
-            $writer->endTag;
+    my $body = XML::Twig::Elt->new('body')->paste(last_child => $root);
+    for my $entry (@{$self->entries}){
+        my $entry_el = XML::Twig::Elt->new(
+            entry => {$entry->id ? (id => $entry->id) : ()})->
+            paste(last_child => $body);
+        if(my $sf = $entry->subject_field){
+            XML::Twig::Elt->new(subjectField => $sf)->paste(
+                last_child => $entry_el);
         }
-        for my $langGrp (@{$concept->lang_groups}){
-            $writer->startTag('langGroup',
-                $langGrp->code ? ('xml:lang' => $langGrp->code) : () );
+        for my $langGrp (@{$entry->lang_groups}){
+            my $lang_el = XML::Twig::Elt->new(langGroup =>
+                {$langGrp->code ? ('xml:lang' => $langGrp->code) : ()}
+            )->paste(last_child => $entry_el);
             for my $termGrp (@{$langGrp->term_groups}){
-                $writer->startTag('termGroup');
-
+                my $term_el = XML::Twig::Elt->new('termGroup')->paste(
+                    last_child => $lang_el);
                 if (my $term = $termGrp->term){
-                    $writer->startTag('term');
-                    $writer->characters($term);
-                    $writer->endTag; # term
+                    XML::Twig::Elt->new(term => $term)->paste(
+                        last_child => $term_el);
                 }
 
                 if (my $customer = $termGrp->customer){
-                    $writer->startTag('customer');
-                    $writer->characters($customer);
-                    $writer->endTag; # customer
+                    XML::Twig::Elt->new(customer => $customer)->paste(
+                        last_child => $term_el);
                 }
 
                 if (my $note = $termGrp->note){
-                    $writer->startTag('note');
-                    $writer->characters($note);
-                    $writer->endTag; # note
+                    XML::Twig::Elt->new(note => $note)->paste(
+                        last_child => $term_el);
                 }
 
                 if (my $status = $termGrp->status){
-                    $writer->startTag('termStatus');
-                    $writer->characters($status);
-                    $writer->endTag; # termStatus
+                    XML::Twig::Elt->new(termStatus => $status )->paste(
+                        last_child => $term_el);
                 }
 
                 if (my $pos = $termGrp->part_of_speech){
-                    $writer->startTag('partOfSpeech');
-                    $writer->characters($pos);
-                    $writer->endTag; # partOfSpeech
+                    XML::Twig::Elt->new(partOfSpeech => $pos)->paste(
+                        last_child => $term_el);
                 }
 
-                $writer->endTag; # termGroup
-            }
-            $writer->endTag; # langGroup
-        }
-        $writer->endTag; # entry
-    }
+            } # end termGroup
+        } # end langGroup
+    } # end entry
 
-    $writer->endTag; # body
-
-    $writer->endTag; # TBX
-    $writer->end;
-    return $xml;
+    # return pretty-printed string
+    XML::Twig->set_pretty_print('indented');
+    return \$root->sprint;
 }
 
 ######################
@@ -412,7 +394,7 @@ TBX::Min - Read, write and edit TBX-Min files
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -489,15 +471,15 @@ in the document.The array ref is the same one used to store the objects
 internally, so additions or removals from the array will be reflected in future
 calls to this method.
 
-=head2 C<add_concept>
+=head2 C<add_entry>
 
-Adds the input C<TBX::Min::LangGroup> object to the list of language groups
+Adds the input C<TBX::Min::Entry> object to the list of language groups
 contained by this object.
 
 =head2 C<as_xml>
 
-Returns a string pointer containing an XML representation of this TBX-Min
-document.
+Returns a scalar reference containing an XML representation of this
+TBX-Min document.
 
 =head1 AUTHOR
 

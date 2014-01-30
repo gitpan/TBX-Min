@@ -15,6 +15,6 @@ my $basic_txt = $basic_path->slurp;
 
 my $min = TBX::Min->new_from_xml($basic_path);
 
-my $new_xml = $min->as_xml;
+my $new_xml = ${ $min->as_xml };
 
 is_xml($new_xml, $basic_txt, 'TBX input and output match');

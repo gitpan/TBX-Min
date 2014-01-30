@@ -2,7 +2,7 @@ NAME
     TBX::Min - Read, write and edit TBX-Min files
 
 VERSION
-    version 0.04
+    version 0.05
 
 SYNOPSIS
         use TBX::Min;
@@ -64,12 +64,12 @@ METHODS
     internally, so additions or removals from the array will be reflected in
     future calls to this method.
 
-  "add_concept"
-    Adds the input "TBX::Min::LangGroup" object to the list of language
-    groups contained by this object.
+  "add_entry"
+    Adds the input "TBX::Min::Entry" object to the list of language groups
+    contained by this object.
 
   "as_xml"
-    Returns a string pointer containing an XML representation of this
+    Returns a scalar reference containing an XML representation of this
     TBX-Min document.
 
 AUTHOR
