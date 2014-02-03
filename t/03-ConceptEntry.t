@@ -6,8 +6,7 @@ use Test::More;
 plan tests => 11;
 use Test::Deep;
 use Test::NoWarnings;
-use TBX::Min::Entry;
-use TBX::Min::LangGroup;
+use TBX::Min;
 use FindBin qw($Bin);
 use Path::Tiny;
 

@@ -74,6 +74,3 @@
 ^TODO\.txt
 
 \b_Inline
-#don't ship schemas to CPAN
-schema
-RNG

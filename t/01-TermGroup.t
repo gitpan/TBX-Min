@@ -6,7 +6,7 @@ use Test::More;
 plan tests => 29;
 use Test::NoWarnings;
 use Test::Exception;
-use TBX::Min::TermGroup;
+use TBX::Min;
 use FindBin qw($Bin);
 use Path::Tiny;
 

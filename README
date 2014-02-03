@@ -2,16 +2,45 @@ NAME
     TBX::Min - Read, write and edit TBX-Min files
 
 VERSION
-    version 0.05
+    version 0.06
 
 SYNOPSIS
         use TBX::Min;
         my $min = TBX::Min->new('/path/to/file.tbx');
         my $entries = $min->entries;
+        my $entry = TBX::Min::Entry->new({id => 'B001'});
+        $min->add_entry($entry);
 
 DESCRIPTION
-    TBX-Min is a minimal, DCT-style dialect of TBX. This module allows you
-    to read, write and edit the contents of TBX-Min data.
+    This module allows you to read, write and edit the contents of TBX-Min
+    data.
+
+    "use"ing this module also automatically "use"s TBX::Min::Entry,
+    TBX::Min::LangGroup, and TBX::Min::TermGroup via Import::Into.
+    LangGroups contain TermGroups, Entries contain LangGroups, and this
+    class contains Entries. These correspond to the three levels of
+    information found in TML. You can build up TBX::Min documents this way
+    and then print them via "as_xml". You can also read an entire TBX-Min
+    XML document for editing via "new_from_xml".
+
+TBX-Min
+    TBX-Min is a minimal, DCT-style dialect of TBX. It's purpose is to
+    represent extremely simple termbases, such as spreadsheets, and to be as
+    human eye-friendly as possible. TBX-Min did not evolve from any other
+    XML dialect, and so does not have historical artifacts such as "martif".
+
+    DCT stands for "Data Category as Tag Name". Whereas in most TBX dialects
+    categories such as "partOfSpeech" are indicated through attributes, in
+    TBX-Min the tag names represent categories. This makes for a very
+    readable document. While TBX-Min documents do conform to TML
+    (Terminological Markup Language) structure, DCT documents cannot be
+    checked by the TBX-Checker <https://sourceforge.net/projects/tbxutil/>.
+
+    If you need more complex or information-rich termbases, we suggest you
+    use TBX-Basic or even TBX-Default. If you have a TBX-Min document and
+    would like to upgrade it to TBX-Basic, see Convert::TBX::Min.
+    Alternatively if you would like to change your TBX-Basic to TBX-Min, see
+    Convert::TBX::Basic.
 
 METHODS
   "new_from_xml"
@@ -70,7 +99,24 @@ METHODS
 
   "as_xml"
     Returns a scalar reference containing an XML representation of this
-    TBX-Min document.
+    TBX-Min document. The data is a UTF-8 encoded string.
+
+CAVEATS
+    TBX::Min does not as of yet fully validate TBX-Min documents. It is
+    possible to create non-validating XML via the as_xml method. This should
+    be fixed in the future.
+
+SEE ALSO
+    The following related modules:
+
+    TBX::Min::Entry
+    TBX::Min::LangGroup
+    TBX::Min::TermGroup
+    Convert::TBX::Min
+    Convert::TBX::Basic
+
+    Schema for valiating TBX-Min files are available on GitHub
+    <https://github.com/byutrg/TBX-Spec>.
 
 AUTHOR
     Nathan Glenn <garfieldnate@gmail.com>

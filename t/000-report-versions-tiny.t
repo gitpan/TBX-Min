@@ -54,6 +54,7 @@ eval { $v .= pmver('DateTime::Format::ISO8601','any version') };
 eval { $v .= pmver('File::Find','any version') };
 eval { $v .= pmver('File::Temp','any version') };
 eval { $v .= pmver('FindBin','any version') };
+eval { $v .= pmver('Import::Into','any version') };
 eval { $v .= pmver('Module::Build','0.3601') };
 eval { $v .= pmver('Path::Tiny','any version') };
 eval { $v .= pmver('Pod::Coverage::TrustPod','any version') };

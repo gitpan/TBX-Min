@@ -3,11 +3,12 @@
 use strict;
 use warnings;
 use Test::More 0.88;
-plan tests => 44;
+plan tests => 45;
 use Test::NoWarnings;
 use TBX::Min;
 use FindBin qw($Bin);
 use Path::Tiny;
+use Test::Exception;
 
 my $basic_path = path($Bin, 'corpus', 'basic.tbx');
 my $basic_txt = $basic_path->slurp;
@@ -19,6 +20,8 @@ note('reading XML string');
 test_read(\$basic_txt);
 
 test_empty_tbx();
+
+test_errors();
 
 sub test_read {
     my ($input) = @_;
@@ -74,4 +77,22 @@ sub test_empty_tbx {
     my $empty_tbx = '<TBX dialect="TBX-Min"/>';
     my $min = TBX::Min->new_from_xml(\$empty_tbx);
     is_deeply($min->entries, [], 'entries returns [] by default');
+}
+
+sub test_errors {
+    subtest 'die on bad dialect' => sub {
+        plan tests => 2;
+        throws_ok(
+            sub {
+                TBX::Min->new_from_xml(\'<TBX dialect="whatevs"/>')
+            },
+            qr{input TBX is whatevs \(should be 'TBX-Min'\)}i,
+            'incorrect dialect' );
+        throws_ok(
+            sub {
+                TBX::Min->new_from_xml(\'<TBX/>')
+            },
+            qr{input TBX is unknown \(should be 'TBX-Min'\)}i,
+            'incorrect dialect' );
+    };
 }

@@ -9,6 +9,8 @@
 package TBX::Min;
 use strict;
 use warnings;
+our $VERSION = '0.06'; # VERSION
+# ABSTRACT: Read, write and edit TBX-Min files
 use XML::Twig;
 use autodie;
 use Path::Tiny;
@@ -16,11 +18,18 @@ use Carp;
 use TBX::Min::Entry;
 use TBX::Min::LangGroup;
 use TBX::Min::TermGroup;
+use Import::Into;
 use DateTime::Format::ISO8601;
 use Try::Tiny;
-our $VERSION = '0.05'; # VERSION
 
-# ABSTRACT: Read, write and edit TBX-Min files
+# Use Import::Into to export subclasses into caller
+sub import {
+    my $target = caller;
+    TBX::Min::Entry->import::into($target);
+    TBX::Min::LangGroup->import::into($target);
+    TBX::Min::TermGroup->import::into($target);
+    return;
+}
 
 sub new_from_xml {
     my ($class, $data) = @_;
@@ -33,8 +42,7 @@ sub new_from_xml {
 
     # build a twig out of the input document
     my $twig = XML::Twig->new(
-        # pretty_print    => 'nice', #this seems to affect other created twigs, too
-        # output_encoding => 'UTF-8',
+        output_encoding => 'UTF-8',
         # do_not_chain_handlers => 1, #can be important when things get complicated
         keep_spaces     => 0,
 
@@ -46,6 +54,7 @@ sub new_from_xml {
         },
 
         TwigHandlers    => {
+            TBX => \&_check_dialect,
             # header attributes become attributes of the TBX::Min object
             id => \&_headerAtt,
             description => \&_headerAtt,
@@ -294,8 +303,20 @@ sub as_xml {
 ######################
 ### XML TWIG HANDLERS
 ######################
-# all of the twig handlers store state on the XML::Twig object. A bit kludgy,
-# but it works.
+
+# croak if the user happened to use the wrong dialect of TBX
+sub _check_dialect {
+    my (undef, $node) = @_;
+    my $type = $node->att('dialect') || 'unknown';
+    my $expected = 'TBX-Min';
+    if($type ne $expected){
+        croak "Input TBX is $type (should be '$expected')";
+    }
+    return 1;
+}
+
+# most of the twig handlers store state on the XML::Twig object.
+# A bit kludgy, but it works.
 
 sub _headerAtt {
     my ($twig, $node) = @_;
@@ -394,19 +415,50 @@ TBX::Min - Read, write and edit TBX-Min files
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
     use TBX::Min;
     my $min = TBX::Min->new('/path/to/file.tbx');
     my $entries = $min->entries;
+    my $entry = TBX::Min::Entry->new({id => 'B001'});
+    $min->add_entry($entry);
 
 =head1 DESCRIPTION
 
-TBX-Min is a minimal, DCT-style dialect of TBX. This module
-allows you to read, write and edit the contents of TBX-Min
+This module allows you to read, write and edit the contents of TBX-Min
 data.
+
+C<use>ing this module also automatically C<use>s L<TBX::Min::Entry>,
+L<TBX::Min::LangGroup>, and L<TBX::Min::TermGroup> via
+L<Import::Into>. LangGroups contain TermGroups, Entries contain
+LangGroups, and this class contains Entries. These correspond to the
+three levels of information found in TML. You can build up TBX::Min
+documents this way and then print them via L</as_xml>. You can also
+read an entire TBX-Min XML document for editing via L</new_from_xml>.
+
+=head1 TBX-Min
+
+TBX-Min is a minimal, DCT-style dialect of TBX. It's purpose is to
+represent extremely simple termbases, such as spreadsheets, and to
+be as human eye-friendly as possible. TBX-Min did not evolve from
+any other XML dialect, and so does not have historical artifacts
+such as "martif".
+
+DCT stands for "Data Category as Tag Name". Whereas in most TBX
+dialects categories such as C<partOfSpeech> are indicated through
+attributes, in TBX-Min the tag names represent categories. This
+makes for a very readable document. While TBX-Min documents do
+conform to TML (Terminological Markup Language) structure, DCT
+documents cannot be checked by the
+L<TBX-Checker|https://sourceforge.net/projects/tbxutil/>.
+
+If you need more complex or information-rich termbases, we suggest
+you use TBX-Basic or even TBX-Default. If you have a TBX-Min document
+and would like to upgrade it to TBX-Basic, see L<Convert::TBX::Min>.
+Alternatively if you would like to change your TBX-Basic to TBX-Min,
+see L<Convert::TBX::Basic>.
 
 =head1 METHODS
 
@@ -479,7 +531,34 @@ contained by this object.
 =head2 C<as_xml>
 
 Returns a scalar reference containing an XML representation of this
-TBX-Min document.
+TBX-Min document. The data is a UTF-8 encoded string.
+
+=head1 CAVEATS
+
+TBX::Min does not as of yet fully validate TBX-Min documents. It is
+possible to create non-validating XML via the L<as_xml> method.
+This should be fixed in the future.
+
+=head1 SEE ALSO
+
+The following related modules:
+
+=over
+
+=item L<TBX::Min::Entry>
+
+=item L<TBX::Min::LangGroup>
+
+=item L<TBX::Min::TermGroup>
+
+=item L<Convert::TBX::Min>
+
+=item L<Convert::TBX::Basic>
+
+=back
+
+Schema for valiating TBX-Min files are available on
+L<GitHub|https://github.com/byutrg/TBX-Spec>.
 
 =head1 AUTHOR
 

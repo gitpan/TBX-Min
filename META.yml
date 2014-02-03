@@ -27,20 +27,21 @@ no_index:
 provides:
   TBX::Min:
     file: lib/TBX/Min.pm
-    version: 0.05
+    version: 0.06
   TBX::Min::Entry:
     file: lib/TBX/Min/Entry.pm
-    version: 0.05
+    version: 0.06
   TBX::Min::LangGroup:
     file: lib/TBX/Min/LangGroup.pm
-    version: 0.05
+    version: 0.06
   TBX::Min::TermGroup:
     file: lib/TBX/Min/TermGroup.pm
-    version: 0.05
+    version: 0.06
 requires:
   Carp: 0
   Class::Tiny: 0
   DateTime::Format::ISO8601: 0
+  Import::Into: 0
   Path::Tiny: 0
   Try::Tiny: 0
   XML::Twig: 0
@@ -54,7 +55,7 @@ resources:
   homepage: https://github.com/byutrg/p5-TBX-Min
   license: http://dev.perl.org/licenses/
   repository: https://github.com/byutrg/p5-TBX-Min.git
-version: 0.05
+version: 0.06
 x_BuiltWith:
   modules:
     Carp: 1.26
@@ -63,6 +64,7 @@ x_BuiltWith:
     File::Find: 1.20
     File::Temp: 0.2301
     FindBin: 1.51
+    Import::Into: 1.002000
     Module::Build: 0.4005
     Path::Tiny: 0.047
     Pod::Coverage::TrustPod: 0.100002

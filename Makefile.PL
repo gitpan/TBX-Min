@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
     "Carp" => 0,
     "Class::Tiny" => 0,
     "DateTime::Format::ISO8601" => 0,
+    "Import::Into" => 0,
     "Path::Tiny" => 0,
     "Try::Tiny" => 0,
     "XML::Twig" => 0,
@@ -43,7 +44,7 @@ my %WriteMakefileArgs = (
     "Test::NoWarnings" => 0,
     "Test::XML" => 0
   },
-  "VERSION" => "0.05",
+  "VERSION" => "0.06",
   "test" => {
     "TESTS" => "t/*.t"
   }

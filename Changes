@@ -1,5 +1,9 @@
 Revision history for TBX-Min
 
+0.06      2014-02-03 13:01:04 America/Los_Angeles
+    check input document for use of incorrect dialect
+    import TBX::Min::Entry, etc. automatically
+    updated documentation
 0.05      2014-01-30 14:55:25 America/Los_Angeles
     Fixed warning on 5.10.X
     add_concept changed to add_entry as should have been done in 0.04

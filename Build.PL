@@ -17,7 +17,7 @@ my %module_build_args = (
     "Nathan Glenn <garfieldnate\@gmail.com>"
   ],
   "dist_name" => "TBX-Min",
-  "dist_version" => "0.05",
+  "dist_version" => "0.06",
   "license" => "perl",
   "module_name" => "TBX::Min",
   "recommends" => {},
@@ -26,6 +26,7 @@ my %module_build_args = (
     "Carp" => 0,
     "Class::Tiny" => 0,
     "DateTime::Format::ISO8601" => 0,
+    "Import::Into" => 0,
     "Path::Tiny" => 0,
     "Try::Tiny" => 0,
     "XML::Twig" => 0,

@@ -8,7 +8,6 @@ use Test::NoWarnings;
 use Test::Exception;
 use Test::Deep;
 use TBX::Min;
-use TBX::Min::Entry;
 use FindBin qw($Bin);
 use Path::Tiny;
 
